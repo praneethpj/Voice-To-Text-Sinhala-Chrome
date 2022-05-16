@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Sinhala Voice To Text</title>
+    <script src="http://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
+    <div id="info">Microphone Permission ලබා දී කථනය ආරම්භ කරන්න</div>
+    <script type="text/javascript">
+      
+        var final_transcript = '';
+        var recognizing = false;
+        var ignore_onend;
+        var recognition = new webkitSpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.lang = "si-LK";
+
+        recognition.onstart = function () {
+            recognizing = true;
+ document.getElementById('info').innerHTML = "දැන් කියන්න";
+        };
+
+        recognition.onend = function () {
+            recognizing = false;
+            if (ignore_onend) {
+                return;
+            }
+            if (!final_transcript) {
+                return;
+            }
+        };
+
+        recognition.onresult = function (event) {
+            var interim_transcript = '';
+            for (var i = event.resultIndex; i < event.results.length; ++i) {
+                if (event.results[i].isFinal) {
+                    final_transcript += event.results[i][0].transcript;
+                } else {
+                    interim_transcript += event.results[i][0].transcript;
+                }
+            }
+          //  document.getElementById('final').innerHTML = format(final_transcript);
+           // document.getElementById('draft').innerHTML = format(interim_transcript);
+          $("#final").html(format(final_transcript));
+           $("#draft").html(format(interim_transcript));
+        };
+
+        function format(s) {
+            return linebreak(capitalize(s));
+        }
+
+        function linebreak(s) {
+            return s.replace(/\n\n/g, '<p></p>').replace(/\n/g, '<br>');
+        }
+
+        function capitalize(s) {
+            return s.replace(/\S/, function (m) {
+                return m.toUpperCase();
+            });
+        }
+        function stop(){
+            recognition.stop();
+        }
+function clearBox(elementID)
+{
+    document.getElementById(elementID).innerHTML = "";
+}
+  function copy(containerid){
+             if (document.selection) {
+    var range = document.body.createTextRange();
+    range.moveToElementText(document.getElementById(containerid));
+    range.select().createTextRange();
+    document.execCommand("copy");
+  } else if (window.getSelection) {
+    var range = document.createRange();
+    range.selectNode(document.getElementById(containerid));
+    window.getSelection().addRange(range);
+    document.execCommand("copy");
+    //alert("Text has been copied, now paste in the text-area")
+  }
+        }
+
+   $(document).ready(function () {
+            recognition.start();
+            ignore_onend = false;
+         });
+
+    </script>
+</head>
+
+<body>
+<br>
+<div>
+<button onclick="stop();">Stop</button>
+<button onclick="copy('final');">Copy All</button>
+<button onclick="clearBox('final');">Clear All</button>
+</div>
+    <span id="final"></span>  <span id="draft"></span>
+    
+</body>
+
+</html>
